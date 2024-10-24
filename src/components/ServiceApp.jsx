@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CheckCircleIcon, CircleStop, XCircleIcon } from "lucide-react"; 
 import Switch from "./Switch";
 import Wrapper from "./Wrapper";
 
@@ -19,13 +20,12 @@ const ServiceApp = () => {
     }
   };
 
-
   return (
     <Wrapper title={"Apache & MySQL Server Control"}>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow">
-          <h2 className="text-xl mb-2">Apache</h2>
+        {/* Apache Control */}
+        <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow-lg transition-all">
+          <h2 className="text-xl font-medium text-neutral-100 mb-4">Apache</h2>
           <Switch
             checked={apacheRunning}
             onChange={(e) => {
@@ -34,11 +34,22 @@ const ServiceApp = () => {
               controlService("apache2", checked ? "start" : "stop");
             }}
           />
-          <p className="mt-2">{apacheRunning ? "Running" : "Stopped"}</p>
+          <p className={`mt-4 flex items-center ${apacheRunning ? "text-green-500" : "text-red-500"}`}>
+            {apacheRunning ? (
+              <>
+                <CheckCircleIcon className="w-5 h-5 mr-2" /> Running
+              </>
+            ) : (
+              <>
+                <CircleStop className="w-5 h-5 mr-2" /> Stopped
+              </>
+            )}
+          </p>
         </div>
 
-        <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow">
-          <h2 className="text-xl mb-2">MySQL</h2>
+        {/* MySQL Control */}
+        <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow-lg transition-all">
+          <h2 className="text-xl font-medium text-neutral-100 mb-4">MySQL</h2>
           <Switch
             checked={mysqlRunning}
             onChange={(e) => {
@@ -47,11 +58,23 @@ const ServiceApp = () => {
               controlService("mysql", checked ? "start" : "stop");
             }}
           />
-          <p className="mt-2">{mysqlRunning ? "Running" : "Stopped"}</p>
+          <p className={`mt-4 flex items-center ${mysqlRunning ? "text-green-500" : "text-red-500"}`}>
+            {mysqlRunning ? (
+              <>
+                <CheckCircleIcon className="w-5 h-5 mr-2" /> Running
+              </>
+            ) : (
+              <>
+                <CircleStop className="w-5 h-5 mr-2" /> Stopped
+              </>
+            )}
+          </p>
         </div>
       </div>
-      <div className="mt-4">
-        <p className="text-neutral-300">{status}</p>
+
+      {/* Status Message */}
+      <div className="mt-6 p-3 rounded-lg bg-neutral-900 shadow-md text-neutral-300">
+        <p>{status}</p>
       </div>
     </Wrapper>
   );
