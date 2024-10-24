@@ -1,23 +1,37 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import createTray from './tray';
+import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import controlService from './controlService.js';
 
 // Getting __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Service control function
+const controlService = (service, action) => {
+  const command = `pkexec systemctl ${action} ${service}`;
+  exec(command, (error, stdout, stderr) => {
+    const message = error ? `Error: ${stderr}` : `Success: ${stdout}`;
+    // Displaying a balloon notification (assuming `tray` is defined somewhere globally if needed)
+    if (global.tray) {
+      global.tray.displayBalloon({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} ${service.charAt(0).toUpperCase() + service.slice(1)}`,
+        content: message,
+      });
+    }
+  });
+};
+
 function createWindow() {
   const win = new BrowserWindow({
-    minWidth: 700,
-    minHeight: 600,
-    maxWidth: 700,
-    maxHeight: 600,
+    minWidth: 800,
+    minHeight: 650,
+    maxWidth: 800,
+    maxHeight: 650,
     webPreferences: {
-      preload: join(__dirname, 'preload.js'),
+      preload: join(__dirname, 'preload.js'), 
       nodeIntegration: false,
-      contextIsolation: true, // NOTE: Keep it enabled for security
+      contextIsolation: true, 
     },
   });
 
@@ -36,8 +50,8 @@ function createWindow() {
   // Loading Vite's dev server
   win.loadURL('http://localhost:5173');
 
-  // Calling the tray function
-  createTray(win);
+  
+  global.tray = createTray(win);
 }
 
 app.whenReady().then(() => {
@@ -52,6 +66,14 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
+// Listening to IPC events for controlling services
 ipcMain.on('control-service', (event, service, action) => {
   controlService(service, action);
 });
+
+// // Function to create a tray (this would be better in its own file, but including here for simplicity)
+// function createTray(win) {
+//   // Implement tray creation logic here if necessary.
+//   // Placeholder, as the actual tray code isn't in this example.
+//   return null;
+// }
