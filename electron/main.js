@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import controlService from './controlService'; // Import controlService from its new file
+import controlService from './controlService'; 
 import createTray from './tray';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';

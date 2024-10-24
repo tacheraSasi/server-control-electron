@@ -2,11 +2,11 @@ import { app, Tray, Menu } from 'electron';
 import controlService from './controlService';
 import { join } from 'path';
 
-// Declare the tray variable
+// Declaring the tray variable
 let tray;
 
 export default function createTray(win) {
-  tray = new Tray(join(__dirname, '../public/icon.png')); // Use the correct path to the icon
+  tray = new Tray(join(__dirname, '../public/icon.png')); 
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Start Apache',
