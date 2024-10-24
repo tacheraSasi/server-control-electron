@@ -10,16 +10,18 @@ const __dirname = dirname(__filename);
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 700,
+    minHeight: 600,
+    maxWidth: 700,
+    maxHeight: 600,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true, // Keep it enabled for security, should not be false
+      contextIsolation: true, // NOTE:Keep it enabled for security, should not be false
     },
   });
 
-  // Fix Content-Security-Policy Warning for Development
+  // Fixing Content-Security-Policy Warning for Development
   win.webContents.on('did-finish-load', () => {
     win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
       callback({
