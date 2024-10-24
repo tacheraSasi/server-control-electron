@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron'; // Added Tray and Menu
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -7,14 +7,17 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Declare global tray variable
+let tray;
+
 // Service control function
 const controlService = (service, action) => {
   const command = `pkexec systemctl ${action} ${service}`;
   exec(command, (error, stdout, stderr) => {
     const message = error ? `Error: ${stderr}` : `Success: ${stdout}`;
-    // Displaying a balloon notification (assuming `tray` is defined somewhere globally if needed)
-    if (global.tray) {
-      global.tray.displayBalloon({
+    // Displaying a balloon notification (assuming `tray` is defined)
+    if (tray) {
+      tray.displayBalloon({
         title: `${action.charAt(0).toUpperCase() + action.slice(1)} ${service.charAt(0).toUpperCase() + service.slice(1)}`,
         content: message,
       });
@@ -58,6 +61,8 @@ function createTray(win) {
   tray.on('click', () => {
     win.isVisible() ? win.hide() : win.show();
   });
+
+  return tray; // Return the tray object
 }  
 
 function createWindow() {
@@ -66,7 +71,7 @@ function createWindow() {
     minHeight: 450,
     maxWidth: 800,
     maxHeight: 450,
-    menu:null,
+    menu: null,
     webPreferences: {
       preload: join(__dirname, 'preload.js'), 
       nodeIntegration: false,
@@ -89,7 +94,7 @@ function createWindow() {
   // Loading Vite's dev server
   win.loadURL('http://localhost:5173');
 
-  
+  // Assign tray to global
   global.tray = createTray(win);
 }
 
@@ -109,5 +114,3 @@ app.on('window-all-closed', () => {
 ipcMain.on('control-service', (event, service, action) => {
   controlService(service, action);
 });
-
-
