@@ -1,13 +1,12 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
-import { exec } from 'child_process';
+import { app, BrowserWindow, ipcMain } from 'electron';
+import controlService from './controlService'; // Import controlService from its new file
+import createTray from './tray';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 // Getting __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-let tray;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -18,7 +17,7 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true, // NOTE:Keep it enabled for security
+      contextIsolation: true, // NOTE: Keep it enabled for security
     },
   });
 
@@ -37,59 +36,8 @@ function createWindow() {
   // Loading Vite's dev server
   win.loadURL('http://localhost:5173');
 
-  // Create tray icon when window is created
+  // Calling the tray function
   createTray(win);
-}
-
-function createTray(win) {
-  tray = new Tray(join(__dirname, 'icon.png')); // Replace with your icon path
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Start Apache',
-      click: () => controlService('apache2', 'start'),
-    },
-    {
-      label: 'Stop Apache',
-      click: () => controlService('apache2', 'stop'),
-    },
-    {
-      label: 'Start MySQL',
-      click: () => controlService('mysql', 'start'),
-    },
-    {
-      label: 'Stop MySQL',
-      click: () => controlService('mysql', 'stop'),
-    },
-    {
-      type: 'separator',
-    },
-    {
-      label: 'Exit',
-      click: () => {
-        app.quit();
-      },
-    },
-  ]);
-
-  tray.setToolTip('Server Control');
-  tray.setContextMenu(contextMenu);
-  tray.on('click', () => {
-    win.isVisible() ? win.hide() : win.show();
-  });
-}
-
-function controlService(service, action) {
-  const command = `pkexec systemctl ${action} ${service}`;
-  exec(command, (error, stdout, stderr) => {
-    const message = error ? `Error: ${stderr}` : `Success: ${stdout}`;
-    // Optionally send message to renderer process
-    if (tray) {
-      tray.displayBalloon({
-        title: `${action.charAt(0).toUpperCase() + action.slice(1)} ${service.charAt(0).toUpperCase() + service.slice(1)}`,
-        content: message,
-      });
-    }
-  });
 }
 
 app.whenReady().then(() => {
