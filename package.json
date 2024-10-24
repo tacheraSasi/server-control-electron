@@ -1,5 +1,10 @@
 {
   "name": "server-control",
+  "description": "A simple electron app to control you mysql and apache server on linux built with react and electron ",
+  "author": {
+    "name": "Tachera Sasi",
+    "url": "https://tacher.com"
+  },
   "private": true,
   "version": "0.0.0",
   "main": "electron/main.js",
@@ -11,7 +16,8 @@
     "electron": "electron .",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dist": "vite build && electron-builder"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",
@@ -19,8 +25,6 @@
     "axios": "^1.7.7",
     "concurrently": "^9.0.1",
     "ekilirelay": "^1.0.3",
-    "electron": "^33.0.2",
-    "electron-builder": "^25.1.8",
     "lucide-react": "^0.447.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -42,6 +46,29 @@
     "globals": "^15.9.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
-    "vite": "^5.4.8"
+    "vite": "^5.4.8",
+    "electron": "^33.0.2",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.example.servercontrol",
+    "productName": "Server Control",
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "Utility"
+    }
   }
 }
