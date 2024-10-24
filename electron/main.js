@@ -22,6 +22,44 @@ const controlService = (service, action) => {
   });
 };
 
+// Function to create a tray and add controls
+function createTray(win) {
+  tray = new Tray(join(__dirname, '../public/icon.png')); 
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Start Apache',
+      click: () => controlService('apache2', 'start'),
+    },
+    {
+      label: 'Stop Apache',
+      click: () => controlService('apache2', 'stop'),
+    },
+    {
+      label: 'Start MySQL',
+      click: () => controlService('mysql', 'start'),
+    },
+    {
+      label: 'Stop MySQL',
+      click: () => controlService('mysql', 'stop'),
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Exit',
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setToolTip('Server Control');
+  tray.setContextMenu(contextMenu);
+  tray.on('click', () => {
+    win.isVisible() ? win.hide() : win.show();
+  });
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     minWidth: 800,

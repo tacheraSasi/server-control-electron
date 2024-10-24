@@ -26,6 +26,7 @@ const ServiceApp = () => {
 
   // Control service function
   const controlService = (service, action) => {
+    console.log("clicked")
     if (window.electron && window.electron.ipcRenderer) {
       window.electron.ipcRenderer.send("control-service", service, action);
       setStatus(`${action.charAt(0).toUpperCase() + action.slice(1)}ing ${service.charAt(0).toUpperCase() + service.slice(1)}...`);
@@ -41,6 +42,7 @@ const ServiceApp = () => {
         <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow-lg transition-all">
           <h2 className="text-xl font-medium text-neutral-100 mb-4">Apache</h2>
           <Switch
+            type={"apache"}
             checked={apacheRunning}
             onChange={(e) => {
               const checked = e.target.checked;
@@ -66,6 +68,7 @@ const ServiceApp = () => {
         <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow-lg transition-all">
           <h2 className="text-xl font-medium text-neutral-100 mb-4">MySQL</h2>
           <Switch
+            type={"mysql"}
             checked={mysqlRunning}
             onChange={(e) => {
               const checked = e.target.checked;
