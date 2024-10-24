@@ -1,12 +1,13 @@
-// electron/main.js
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// Get __dirname in ES modules
+// Getting __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+let tray;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -17,7 +18,7 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true, // NOTE:Keep it enabled for security, should not be false
+      contextIsolation: true, // NOTE:Keep it enabled for security
     },
   });
 
@@ -33,8 +34,62 @@ function createWindow() {
     });
   });
 
-  // Load Vite's dev server
+  // Loading Vite's dev server
   win.loadURL('http://localhost:5173');
+
+  // Create tray icon when window is created
+  createTray(win);
+}
+
+function createTray(win) {
+  tray = new Tray(join(__dirname, 'icon.png')); // Replace with your icon path
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Start Apache',
+      click: () => controlService('apache2', 'start'),
+    },
+    {
+      label: 'Stop Apache',
+      click: () => controlService('apache2', 'stop'),
+    },
+    {
+      label: 'Start MySQL',
+      click: () => controlService('mysql', 'start'),
+    },
+    {
+      label: 'Stop MySQL',
+      click: () => controlService('mysql', 'stop'),
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Exit',
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setToolTip('Server Control');
+  tray.setContextMenu(contextMenu);
+  tray.on('click', () => {
+    win.isVisible() ? win.hide() : win.show();
+  });
+}
+
+function controlService(service, action) {
+  const command = `pkexec systemctl ${action} ${service}`;
+  exec(command, (error, stdout, stderr) => {
+    const message = error ? `Error: ${stderr}` : `Success: ${stdout}`;
+    // Optionally send message to renderer process
+    if (tray) {
+      tray.displayBalloon({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} ${service.charAt(0).toUpperCase() + service.slice(1)}`,
+        content: message,
+      });
+    }
+  });
 }
 
 app.whenReady().then(() => {
@@ -50,12 +105,5 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('control-service', (event, service, action) => {
-  const command = `pkexec systemctl ${action} ${service}`;
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      event.reply('service-status', `Error: ${stderr}`);
-    } else {
-      event.reply('service-status', `Success: ${stdout}`);
-    }
-  });
+  controlService(service, action);
 });
