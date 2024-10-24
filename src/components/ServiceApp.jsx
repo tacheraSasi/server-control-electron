@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { CheckCircleIcon, CircleStop, XCircleIcon } from "lucide-react"; 
+import React, { useState, useEffect } from "react";
+import { CheckCircleIcon, CircleStop } from "lucide-react"; 
 import Switch from "./Switch";
 import Wrapper from "./Wrapper";
 
@@ -8,12 +8,26 @@ const ServiceApp = () => {
   const [mysqlRunning, setMysqlRunning] = useState(false);
   const [status, setStatus] = useState("");
 
+  const handleServiceStatus = (event, message) => {
+    setStatus(message);
+  };
+
+  // Handle service status updates from Electron
+  useEffect(() => {
+    if (window.electron) {
+      window.electron.ipcRenderer.on("service-status", handleServiceStatus);
+    }
+    return () => {
+      if (window.electron) {
+        window.electron.ipcRenderer.removeListener("service-status", handleServiceStatus); // Remove the specific listener
+      }
+    };
+  }, []);
+
+  // Control service function
   const controlService = (service, action) => {
     if (window.electron && window.electron.ipcRenderer) {
       window.electron.ipcRenderer.send("control-service", service, action);
-      window.electron.ipcRenderer.on("service-status", (event, message) => {
-        setStatus(message);
-      });
       setStatus(`${action.charAt(0).toUpperCase() + action.slice(1)}ing ${service.charAt(0).toUpperCase() + service.slice(1)}...`);
     } else {
       console.error("Electron API is not available");
@@ -30,6 +44,7 @@ const ServiceApp = () => {
             checked={apacheRunning}
             onChange={(e) => {
               const checked = e.target.checked;
+              console.log("clicked")
               setApacheRunning(checked);
               controlService("apache2", checked ? "start" : "stop");
             }}

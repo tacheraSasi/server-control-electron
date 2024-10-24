@@ -1,11 +1,32 @@
-import { app, Tray, Menu } from 'electron';
-import controlService from './controlService';
-import { join } from 'path';
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
+import { exec } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Declaring the tray variable
+// Getting __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Declaring the tray variable globally
 let tray;
 
-export default function createTray(win) {
+// Service control function
+const controlService = (service, action) => {
+  const command = `pkexec systemctl ${action} ${service}`;
+  exec(command, (error, stdout, stderr) => {
+    const message = error ? `Error: ${stderr}` : `Success: ${stdout}`;
+    // Displaying a balloon notification if tray exists
+    if (tray) {
+      tray.displayBalloon({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} ${service.charAt(0).toUpperCase() + service.slice(1)}`,
+        content: message,
+      });
+    }
+  });
+};
+
+// Function to create a tray and add controls
+function createTray(win) {
   tray = new Tray(join(__dirname, '../public/icon.png')); 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -41,3 +62,53 @@ export default function createTray(win) {
     win.isVisible() ? win.hide() : win.show();
   });
 }
+
+// Function to create the Electron window
+function createWindow() {
+  const win = new BrowserWindow({
+    minWidth: 800,
+    minHeight: 650,
+    maxWidth: 800,
+    maxHeight: 650,
+    webPreferences: {
+      preload: join(__dirname, 'preload.js'), 
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  // Fixing Content-Security-Policy Warning for Development
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': ['default-src \'self\' \'unsafe-inline\' \'unsafe-eval\' data:'],
+        },
+      });
+    });
+  });
+
+  // Loading Vite's dev server
+  win.loadURL('http://localhost:5173');
+
+  // Create the tray icon
+  createTray(win);
+}
+
+app.whenReady().then(() => {
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
+// Listening to IPC events for controlling services
+ipcMain.on('control-service', (event, service, action) => {
+  controlService(service, action);
+});

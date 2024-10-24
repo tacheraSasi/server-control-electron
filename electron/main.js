@@ -25,9 +25,10 @@ const controlService = (service, action) => {
 function createWindow() {
   const win = new BrowserWindow({
     minWidth: 800,
-    minHeight: 650,
+    minHeight: 450,
     maxWidth: 800,
-    maxHeight: 650,
+    maxHeight: 450,
+    menu:null,
     webPreferences: {
       preload: join(__dirname, 'preload.js'), 
       nodeIntegration: false,
@@ -71,9 +72,4 @@ ipcMain.on('control-service', (event, service, action) => {
   controlService(service, action);
 });
 
-// // Function to create a tray (this would be better in its own file, but including here for simplicity)
-// function createTray(win) {
-//   // Implement tray creation logic here if necessary.
-//   // Placeholder, as the actual tray code isn't in this example.
-//   return null;
-// }
+
