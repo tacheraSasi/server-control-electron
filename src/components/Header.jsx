@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { ApplicationLogo } from "./ApplicationLogo";
 import LinkButton from "./LinkButton";
-import EkiliRelay from "ekilirelay";
+// import EkiliRelay from "ekilirelay";
+import { useLocation } from "react-router-dom";
 
 const Header = () => {
+  const location  = useLocation()
+  const pathname = location.pathname
+  console.log(location)
+  const to = pathname == "/"?"/about":"/"
+  const linkName = pathname == "/"?"About":"Home"
  
   return (
     <header className="w-full p-6 flex justify-between ">
@@ -16,7 +22,7 @@ const Header = () => {
 
       <div className="flex gap-4 items-center">
         
-        <LinkButton to="/about">About</LinkButton>
+        <LinkButton to={to}>{linkName}</LinkButton>
       </div>
     </header>
   );
