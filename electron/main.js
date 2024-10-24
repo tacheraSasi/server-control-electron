@@ -1,8 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import controlService from './controlService'; 
 import createTray from './tray';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import controlService from './controlService.js';
 
 // Getting __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
