@@ -58,7 +58,7 @@ function createTray(win) {
   tray.on('click', () => {
     win.isVisible() ? win.hide() : win.show();
   });
-}
+}  
 
 function createWindow() {
   const win = new BrowserWindow({
