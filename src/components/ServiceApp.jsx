@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Switch from "./Switch";
+import Wrapper from "./Wrapper";
 
 const ServiceApp = () => {
   const [apacheRunning, setApacheRunning] = useState(false);
@@ -20,8 +21,8 @@ const ServiceApp = () => {
 
 
   return (
-    <div className="container mx-auto p-6 bg-neutral-900 text-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold mb-6 text-center">Apache & MySQL Server Control</h1>
+    <Wrapper title={"Apache & MySQL Server Control"}>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col items-center p-4 bg-neutral-800 rounded-lg shadow">
           <h2 className="text-xl mb-2">Apache</h2>
@@ -52,7 +53,7 @@ const ServiceApp = () => {
       <div className="mt-4">
         <p className="text-neutral-300">{status}</p>
       </div>
-    </div>
+    </Wrapper>
   );
 };
 
